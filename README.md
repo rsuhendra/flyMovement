@@ -1,4 +1,7 @@
-# flyMovement (README file not updated)
+# flyMovement (THIS README IS NOT UPDATED)
+
+YML FILE IS CONTAINED. INSTALL LIKE SO:
+https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file
 
 This repository contains functions necessary for high throughput processing of video for the study of the behaving fly in a temperature arena. The tracking code determines the location and orientation of the fly in a robust fashion, which allows for detailed study of behavioral dynamics. Some of the important functions in this repository include:
 
