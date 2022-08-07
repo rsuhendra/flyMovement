@@ -47,6 +47,8 @@ for temp in temps:
 
             early2021 = ['Kir2021']
 
+            summer2022 = ['P6Kir', 'P6+', 'P4_P6_+', 'P4_P6_Kir']
+
             if name in dec2021:
                 if quad == 'croppedQ1':
                     arenafile = 'q1_prova1_1.arena'
@@ -124,6 +126,11 @@ for temp in temps:
                         elif quad == 'croppedQ2':
                             arenafile = 'q2_96midJan.arena'
                 scaling = 4.7
+
+            elif name in summer2022:
+                arenafile = 'q1_05_2022.arena'
+                scaling = 4.7
+                tval = 200
 
             arenafile = 'arenas/'+arenafile
             suppress = 1

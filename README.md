@@ -13,45 +13,76 @@ To plot the turns as they happen in the video, simply change the display mode to
 
 Returns .output file with name output_[video name].output. 
 
-**tsne_param_rank.py**: Parametric t-SNE embedding of tracking data.
-```
-python tsne_param_rank.py [folder with tracking output files] [edge parameter]
-```
-The edge parameter is chosen to be 1 for studying behavior away from the arena edges, 0 only near the edges, and anything else for all behavior. This returns a .h5 and .params file, which will be used in the run_tsne_model.py script. 
-
-**run_tsne_model.py**: Script to map points through parametric mapping. 
-``` 
-python run_tsne_model.py [folder with tracking output files] [model file (.h5)]
-```
-This will return a .json file that contains the 2D positions of all behaviors in the embedded space,  as well plots a kernel density estimate of the space, and a segmentation similar to that shown in Berman et al. (2014). 
-
-**check_groups.py**: Script to find symmetric segmentation of behavioral space using Gaussian Mixture Modelling. 
-```
-python check_groups.py [folder with tracking output files] [model file (.h5)] 
-```
-This returns a .gmm file, which can be used in the gmm_stats.py, internal_symmetry_comp_gmm.py, and double_comp_gmm_stats.py scripts. 
-
-**gmm_stats.py**: Calculation of significant change in behavioral expression relative to training set via GMM segmentation. 
+**run_group.py**: Script for running a bunch of videos with the same conditions (i.e. same lighting, arena, camera) once you've check to make sure things are working well. NOTE: This is currently hard-coded, and needs to be modified for conditions used in the video.
 
 ```
-python gmm_stats.py [folder with tracking output files] [model file (.h5)] [master .gmm file]
+python run_group.py [output directory] [directory with video files]
 ```
-Returns an image describing the regions of increased and decreased behavioral expression. Statistical significance is determined at a multiple hypothesis corrected p-value of 0.05 using Fisher's exact test and Benjamini-Hochberg correction. 
 
-**internal_symmetry_comp_gmm.py**: Comparison of behavior to  symmetric partner (by mirroring through the parametric map) and using segmentation from GMM. 
-
-```
-python internal_symmetry_comp_gmm.py [folder with tracking output files] [model file (.h5)] [master .gmm file]
-```
-Returns an image much like gmm_stats.py. 
-
-**double_comp_gmm_stats.py**: Comparison of two behavioral conditions using GMM segmentation. 
+**drawArena.py**: Script for determining the dimension of the behavioral arena. Requires a calibration file for the two-choice arena. 
 
 ```
-python double_comp_gmm_stats.py [folder of group 1 files] [folder of group 2 files] [model file (.h5)] [master .gmm file]
+python drawArena.py [calibration file] [arena file name]
 ```
-Returns image like gmm_stats.py. 
 
+Returns a .arena file, to be used for tracking.I usually store those in a folder called arena. 
+
+**run_all_plots.py**: handy script that runs a whole bunch of different types of analyses in a single go. Provided a folder of tracking output files, it will generate boxplots for AI/walking speed, trajectories for each trial, sideways histogram plots, turn/cross plots and more. Many of these analysis scripts are detailed below.   
+
+```
+python run_all_plots.py
+```
+
+**boundary_analysis_flex.py**: Script for performing basic analysis at the boundary region, including turns/cross quantification, turn depth over time, and sideways histograms.`
+
+```
+python boundary_analysis_flex.py [name of folder containing output files]
+```
+
+**staff_plot_flex.py**: Script for plotting boundary events (same as those analyzed in boundary_analysis_flex.py) on the staff plots, where isothermal lines are drawn every 0.5C. Note, there is also **lines_plot_flex.py**, which plots the body axis of the fly at every time point. 
+
+```
+python staff_plot_flex.py [name of folder containing output files]
+```
+
+**basic_stats_track.py**: Analysis of simple locomotor information. This includes avoidance, average speed, hot speed, cold speed, and distance traveled. NOTE: input should be the name of the given fly as given in your output directory (e.g. FL50 or HCKir). 
+ 
+
+```
+python basic_stats_track.py [name of genotype]
+```
+**basic_boxplots.py**: Makes boxplots of the information calculated in basic_stats_track.py. 
+
+```
+python basic_boxplots.py [name of genotype]
+```
+
+**basic_boxplots_stats.py**: Generates statistics for the data analyzed by the basic_boxplots.py script. This requires changing some stuff in the script itself. If you're not sure how to use this, let me know. 
+```
+python basic_boxplots_stats
+```
+
+**findResponse.py**: Analysis for finding first response behaviors in the boundary region. This method will bring up a series of behaviors occuring in the boundary region, colored by their order. To select a behavior, you choose the number of the behavior 1,2,3,4 after closing the plot showing the behavior. If the event is of bad quality (e.g. fly is on the wall or some tracking issue), choose 0. Note: please be careful when using... can be a bit tricky at first. This generates a .response file, which is used as the input to the next function, 
+
+**plot_special_goof**.  
+
+```
+python find_response.py [name of folder containing output files]
+```
+
+**plot_special_goof.py**: Script to calculate polar plots, turn prediction given temperature difference between antennae plots.
+
+```
+python plot_special_goof.py [name of response file generated by find_response.py]
+```
+
+**plot_traj.py**: Script to plot full trajectories. 
+
+```
+python plot_traj.py [name of output file]   [folder to write to]   [color option (0 =trans vel., 1 = rot vel., 2 = time)]
+```
+
+To run it, you'll need python 3.8, as well as the following packages:
 ## Required packages
 * numpy
 * opencv
