@@ -7,9 +7,6 @@ dependencies:
   - scipy
   - jupyter
   - seaborn
-  - deap
-  - peakutils
-  - neuprint-python
   - imageio
   - statsmodels
   - pyzmq
