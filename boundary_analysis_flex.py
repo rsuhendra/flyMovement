@@ -199,7 +199,7 @@ def isNearTempBarrier(x_pos,y_pos,theta,num,quad_hot,quad_hot_rear):
 
 # dataFname = "./output/"
 inputDir = str(sys.argv[1])
-if inputDir[-1] is not '/':
+if inputDir[-1] != '/':
 	inputDir+='/'
 # arenaData = pickle.load(open(arenaFile,"rb"))
 colorOption = 3
@@ -368,7 +368,7 @@ for filename in os.listdir(inputDir):
 		# ax11.scatter(intersectCenter[0],intersectCenter[1],color='red')
 		showQuadrants = int(filename.split(".")[0].split("_")[-1])
 		# flipping
-		#showQuadrants = 3 - showQuadrants
+		showQuadrants = 3 - showQuadrants
 		last = False
 		cSeq,cSeq_centroid = [],[]
 		cSeq_LA,cSeq_RA = [],[]
@@ -880,6 +880,7 @@ w1.close()
 nVs = [np.array(vList[sortIndsTurn_Filt[j1]])*30/scale_list[sortIndsTurn_Filt[j1]] for j1 in range(0,len(sortIndsTurn_Filt))]
 nrVs = [rvList[sortIndsTurn_Filt[j1]]for j1 in range(0,len(sortIndsTurn_Filt))]
 nDs = [(fSeqs[sortIndsTurn_Filt[j1]][:,1] -allCenters[sortIndsTurn_Filt[j1]][1])/scale_list[sortIndsTurn_Filt[j1]] for j1 in range(0,len(sortIndsTurn_Filt))]
+nDsName = [allFnames[sortIndsTurn_Filt[j1]] for j1 in range(0,len(sortIndsTurn_Filt))] # for Jenna, to label maxTs
 nDs_RA = [(fSeqsRA[sortIndsTurn_Filt[j1]][:,1] -allCenters[sortIndsTurn_Filt[j1]][1])/scale_list[sortIndsTurn_Filt[j1]] for j1 in range(0,len(sortIndsTurn_Filt))]
 nDs_LA = [(fSeqsLA[sortIndsTurn_Filt[j1]][:,1] -allCenters[sortIndsTurn_Filt[j1]][1])/scale_list[sortIndsTurn_Filt[j1]] for j1 in range(0,len(sortIndsTurn_Filt))]
 nDs_centroid = [(fSeqsCentroid[sortIndsTurn_Filt[j1]][:,1] -allCenters[sortIndsTurn_Filt[j1]][1])/scale_list[sortIndsTurn_Filt[j1]] for j1 in range(0,len(sortIndsTurn_Filt))]
@@ -964,11 +965,12 @@ w1.close()
 
 #putting stuff together for histograms. 
 maxTsTurns = []
+maxTsNames = []
 maxTsTurns_1,maxTsTurns_Diff=[],[]
 for i in range(0,len(nTs)):
 	if np.max(nTs[i][nbeforeListT[i]:len(nTs[i])-nafterListT[i]])>25.5:
 		maxTsTurns.append(nDs[i][nbeforeListT[i]+np.argmax(nTs[i][nbeforeListT[i]:len(nTs[i])-nafterListT[i]])])
-
+		maxTsNames.append(nDsName[i])
 		#now do max temp at either antenna
 		lInd = np.argmax(nTs_LA[i][nbeforeListT[i]:len(nTs[i])-nafterListT[i]])
 		rInd = np.argmax(nTs_RA[i][nbeforeListT[i]:len(nTs[i])-nafterListT[i]])
@@ -1891,6 +1893,7 @@ fig.tight_layout()
 plt.savefig('bdryflex/bdryflex_plots/bdryflex_plots_'+groupName+'/'+inputDir.split('/')[-2] +'_marcoplot.svg')
 plt.close()
 
+
 '''
 # make fracs plot with first turns above and below 0 (crosses included)
 firstTsFake = firstTs.copy()
@@ -2133,3 +2136,8 @@ if 0:
 					loc_list,loc_times=[],[]
 					newX=4
 
+# For Jenna, maxTsTurns now has a flyId associated with it (thank god)
+
+belowTurn = [1*(maxTsTurns[i]< yvals[2]) for i in range(len(maxTsTurns))]
+dp = pd.DataFrame({'below': belowTurn, 'maxT': maxTsTurns, 'flyid': maxTsNames} )
+dp.to_csv('bdryflex/bdryflex_data/bdryflex_data_'+groupName+'/'+inputDir.split('/')[-2]+'jenna_maxturns.csv')

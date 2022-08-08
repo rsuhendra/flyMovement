@@ -203,7 +203,7 @@ def isNearTempBarrier(x_pos,y_pos,theta,num,quad_hot,quad_hot_rear):
 
 # dataFname = "./output/"
 inputDir = str(sys.argv[1])
-if inputDir[-1] is not '/':
+if inputDir[-1] != '/':
 	inputDir+='/'
 
 colorOption = 3
@@ -394,7 +394,7 @@ for filename in os.listdir(inputDir):
 		# ax11.scatter(intersectCenter[0],intersectCenter[1],color='red')
 		showQuadrants = int(filename.split(".")[0].split("_")[-1])
 		# flipping
-		#showQuadrants = 3 - showQuadrants
+		showQuadrants = 3 - showQuadrants
 		last = False
 		cSeq = []
 		cSeq_LA,cSeq_RA = [],[]

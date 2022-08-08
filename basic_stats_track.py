@@ -143,7 +143,7 @@ for inputDir in dirs:
 
             showQuadrants = int(filename.split(".")[0].split("_")[-1])
             # flipping
-            #showQuadrants = 3-showQuadrants
+            showQuadrants = 3 - showQuadrants
 
             # calculate basic stats for each video. then add together to get group stats.
 

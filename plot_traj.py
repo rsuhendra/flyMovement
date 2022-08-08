@@ -21,7 +21,7 @@ colorType = int(sys.argv[3])
 quadrant_color = int(sys.argv[4])
 showQuadrants = int(filename.split("/")[-1].split(".")[0].split("_")[-1])
 # flipping
-#showQuadrants = 3-showQuadrants
+showQuadrants = 3-showQuadrants
 # print filename
 ct=0
 (allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(filename,"rb"))

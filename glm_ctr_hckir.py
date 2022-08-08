@@ -86,6 +86,8 @@ for t1 in temps:
 	df['conditionKir'] = df['conditionKir'].astype(bool)
 	df['turnOrNot'] = df['turnOrNot'].astype(bool)
 	'''
+
+	print(df.head())
 	
 	kirTC = df[(df['conditionHC']==0) & (df['conditionKir']==1)]
 	hcTC = df[(df['conditionHC']==1) & (df['conditionKir']==0)]
