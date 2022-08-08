@@ -5,7 +5,6 @@ import sys
 import pickle
 from trackImproved_1 import *
 import os
-import io
 from PIL import Image
 
 
@@ -32,7 +31,7 @@ maxDiff = 0
 		# 	N = np.min([len(behavior[l-1][0]),len(behavior[l][0])])
 		# 	#N = np.min(len(behavior[l][0]),len(behavior[l-1][0]))
 		# 	#print distMetric(behavior[l],behavior[l-1])
-print(maxDiff)
+print (maxDiff)
 color = []
 list1 = []
 listSF = []
@@ -52,11 +51,11 @@ onW = []
 onW_inC = []
 k=0
 useAll = 0
-maxDiff = 200
-
+maxDiff = 300
+wallCheck = []
 for filename in os.listdir(inputDir):
 	if filename.split(".")[-1] == 'output':
-		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs) = pickle.load(open(inputDir+filename,"rb"))
+		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(inputDir+filename,"rb"))
 		#extract max event size. 
 		for l in range(0,len(allEvents)):
 			s1,f1 = allEvents[l].getStartAndFinish()
@@ -78,7 +77,7 @@ for filename in os.listdir(inputDir):
 				startInCold_back = quads_back[0] in coldQuads
 			maxProj = np.asarray(Image.open(allEvents[l].maxProj).convert('L'))
 
-			if allEvents[l].onWall !=1:# and inHot>0 and inCold>0 :
+			if allEvents[l].onWall !=3 and fc_y[s1]!=0.:# and inHot>0 and inCold>0 :
 				if ((f1-s1)>1):
 					if (f1-s1)<maxDiff:			
 						L = maxDiff -(f1-s1)-1
@@ -103,10 +102,11 @@ for filename in os.listdir(inputDir):
 							onW.append(1)
 						else:
 							onW.append(0)
-						if angInit !=(-180) and startInCold and startInCold_head:
+						if angInit !=(-180):
 							onW_inC.append(1)
 						else:
 							onW_inC.append(0)
+						wallCheck.append(allEvents[l].onWall)
 					if colorOption ==3:
 						if (-1 not in set(cM)):
 							maxProjList.append(maxProj)
@@ -115,13 +115,14 @@ for filename in os.listdir(inputDir):
 							behaviorCat.append(np.concatenate([tv_pad,sv_pad,angs_pad]))
 							posList.append(pos)
 							color.append(np.sum(angs_pad))
-							list1.append(l)
+							list1.append((s1,f1))
 							listSF.append(f1-s1)
 							listFNames.append(filename)
 							listEventNum.append(l)
 							angList.append(angInit)
 							ang_val_list.append(ang_val)
 							af_list.append(arenaFile)
+
 							if allEvents[l].frameEntryT != -1:
 								if (f1 - allEvents[l].frameEntryT+1) >=0:
 									listFramesInTempB.append(f1-allEvents[l].frameEntryT+1)
@@ -139,81 +140,98 @@ from sklearn.decomposition import PCA
 from matplotlib.patches import Wedge,Circle
 
 
-def onpick_temp_boundary(event):
-	thisline = event.artist
-	ind = event.ind
-	cL = newListemb[int(ind[0])]
-	print('onpick points:', int(ind[0]),color[cL])
-	fsLength = listSF[cL]
-	title = listFNames[cL]
-	evNum = listEventNum[cL]
-	fig2= plt.figure(figsize=(15,15))
-	ax3 = fig2.add_subplot(1,4,1)
-	transVs = behavior[cL][0][0:fsLength]
-	ax3.plot(transVs)
-	ax3.set_ylabel('translational velocity')
-	plt.title(title+" at number: "+str(evNum))
-	ax4 = fig2.add_subplot(1,4,2)
-	ang1s = behavior[cL][2][0:fsLength]
-	ax4.plot(ang1s)
-	ax4.set_ylabel('angular velocity')
-	ax4.set_ylim((np.min(np.concatenate(([-4],ang1s))),np.max(np.concatenate(([4],ang1s)))))
-	aF = open(af_list[cL],"rb")
-	data = pickle.load(aF)
-	q4 = list(data[0])
-	halfWidth = data[1]/2.
-	halfHeight = data[2]/2.
-	aF.close()
-	ax5 = fig2.add_subplot(1,4,3)
-	for g in groups:
-		if cL in set(g):
-			print g
-			# g.insert(0,g[-1]-1)
-			# g.append(g[-1]+1)
-			# g.append(g[-1]+2)
-			fullPoslist = np.concatenate([posList[c2] for c2 in g],axis=1)
+# def onpick_temp_boundary(event):
+# 	thisline = event.artist
+# 	ind = event.ind
+# 	cL = newListemb[int(ind[0])]
+# 	print('onpick points:', int(ind[0]),color[cL])
+# 	fsLength = listSF[cL]
+# 	title = listFNames[cL]
+# 	evNum = listEventNum[cL]
+# 	fig2= plt.figure(figsize=(15,15))
+# 	ax3 = fig2.add_subplot(1,4,1)
+# 	transVs = behavior[cL][0][0:fsLength]
+# 	ax3.plot(transVs)
+# 	ax3.set_ylabel('translational velocity')
+# 	plt.title(title+" at number: "+str(evNum))
+# 	ax4 = fig2.add_subplot(1,4,2)
+# 	ang1s = behavior[cL][2][0:fsLength]
+# 	ax4.plot(ang1s)
+# 	ax4.set_ylabel('angular velocity')
+# 	ax4.set_ylim((np.min(np.concatenate(([-4],ang1s))),np.max(np.concatenate(([4],ang1s)))))
+# 	aF = open(af_list[cL],"rb")
+# 	data = pickle.load(aF)
+# 	q4 = list(data[0])
+# 	halfWidth = data[1]/2.
+# 	halfHeight = data[2]/2.
+# 	aF.close()
+# 	ax5 = fig2.add_subplot(1,4,3)
+# 	for g in groups:
+# 		if cL in set(g):
+# 			print g
+# 			# g.insert(0,g[-1]-1)
+# 			# g.append(g[-1]+1)
+# 			# g.append(g[-1]+2)
+# 			fullPoslist = np.concatenate([posList[c2] for c2 in g],axis=1)
 
-	pos1 = posList[cL]
-	hTheta = np.array(ang_val_list[cL])
-	head_pos = np.array(pos1)
-	head_pos[0,:] = head_pos[0,:] - 7.0*np.sin(np.pi/180*hTheta)
-	head_pos[1,:] = head_pos[1,:] + 7.0*np.cos(np.pi/180*hTheta)
-	#head_pos = pos1 + 7.0*[np.cos(hTheta),np.sin(hTheta)]
-	t1 = data[3]
-	t2 = data[4]
+# 	pos1 = posList[cL]
+# 	hTheta = np.array(ang_val_list[cL])
+# 	head_pos = np.array(pos1)
+# 	head_pos[0,:] = head_pos[0,:] - 7.0*np.sin(np.pi/180*hTheta)
+# 	head_pos[1,:] = head_pos[1,:] + 7.0*np.cos(np.pi/180*hTheta)
+# 	#head_pos = pos1 + 7.0*[np.cos(hTheta),np.sin(hTheta)]
+# 	t1 = data[3]
+# 	t2 = data[4]
 
-	angVert = np.arctan2((t1[1][1]-t1[1][0]),(t1[0][1]-t1[0][0]))
-	angHoriz = np.arctan2((t2[0][1]-t2[0][0]),(t2[1][1]-t2[1][0]))
+# 	vertVector = np.array([(t1[0][1]-t1[0][0]),(t1[1][1]-t1[1][0])])
+# 	vertVector = vertVector/np.linalg.norm(vertVector)
 
+# 	if vertVector[1]<0:
+# 		vertVector = -vertVector
 
-	if quadList[cL] ==1:
-		topRightQuad = Wedge(q4,(halfWidth+halfHeight)/2,angHoriz,90+angVert,alpha =0.3,color = 'orange')
-		bottomLeftQuad = Wedge(q4,(halfWidth+halfHeight)/2,180+angHoriz,270+angVert,alpha =0.3,color = 'orange')
-		ax5.add_patch(topRightQuad)
-		ax5.add_patch(bottomLeftQuad)
-	elif quadList[cL] ==2:
-		topLeftQuad = Wedge(q4,(halfWidth+halfHeight)/2,90+angVert,180+angHoriz,alpha =0.3,color = 'orange')
-		bottomRightQuad = Wedge(q4,(halfWidth+halfHeight)/2,270+angVert,360+ angHoriz,alpha =0.3,color = 'orange')
-		ax5.add_patch(topLeftQuad)
-		ax5.add_patch(bottomRightQuad)
-	#(x1s,y1s) = calcTrajectory(transVs,ang1s)
-	edge = Circle(q4,radius=(halfWidth+halfHeight)/2,color='black',fill=False)
-	ax5.add_patch(edge)
-	ax5.plot(fullPoslist[0],fullPoslist[1])
+# 	horizVector = np.array([(t2[0][1]-t2[0][0]),(t2[1][1]-t2[1][0])])
+# 	horizVector = horizVector/np.linalg.norm(horizVector)
+# 	if horizVector[0]<0:
+# 		horizVector = -horizVector
 
-	ax5.plot(pos1[0],pos1[1])
-	ax5.plot(head_pos[0,:],head_pos[1,:],color='red')
+# 	# angVert = np.arctan2((t1[1][1]-t1[1][0]),(t1[0][1]-t1[0][0]))
+# 	# angHoriz = np.arctan2((t2[0][1]-t2[0][0]),(t2[1][1]-t2[1][0]))
 
-	ax5.arrow(pos1[0][-1],pos1[1][-1],2*(pos1[0][-1]-pos1[0][-2]),2*(pos1[1][-1]-pos1[1][-2]),head_width=2.0)
-	ax5.set_aspect('equal')
-	aLim = ax5.get_ylim()
-	ax5.set_ylim([aLim[1],aLim[0]])
-	#ax5.set_xlim((np.min(np.concatenate(([-10],x1s))),np.max(np.concatenate(([10],x1s)))))
-	# ax5.set_ylim((np.min(np.concatenate(([-10],y1s))),np.max(np.concatenate(([10],y1s)))))
-	ax5.set_title("trajectory")
-	ax6 = fig2.add_subplot(1,4,4)
-	ax6.imshow(maxProjList[cL])
-	plt.show()
+# 	angVert =np.arctan2(vertVector[1],vertVector[0])
+# 	angHoriz = np.arctan2(horizVector[1],horizVector[0])
+# 	angVert = (180*angVert/np.pi) % 360.
+# 	angVert = 180. - angVert # since image has inverted y axis. 
+# 	angHoriz = 180.*angHoriz/np.pi if abs(angHoriz) < (np.pi/2) else 180.*angHoriz/np.pi -180.
+# 	angHoriz*=-1.
+
+# 	if quadList[cL] ==1:
+# 		topRightQuad = Wedge(q4,(halfWidth+halfHeight)/2,angHoriz,90+angVert,alpha =0.3,color = 'orange')
+# 		bottomLeftQuad = Wedge(q4,(halfWidth+halfHeight)/2,180+angHoriz,270+angVert,alpha =0.3,color = 'orange')
+# 		ax5.add_patch(topRightQuad)
+# 		ax5.add_patch(bottomLeftQuad)
+# 	elif quadList[cL] ==2:
+# 		topLeftQuad = Wedge(q4,(halfWidth+halfHeight)/2,90+angVert,180+angHoriz,alpha =0.3,color = 'orange')
+# 		bottomRightQuad = Wedge(q4,(halfWidth+halfHeight)/2,270+angVert,360+ angHoriz,alpha =0.3,color = 'orange')
+# 		ax5.add_patch(topLeftQuad)
+# 		ax5.add_patch(bottomRightQuad)
+# 	#(x1s,y1s) = calcTrajectory(transVs,ang1s)
+# 	edge = Circle(q4,radius=(halfWidth+halfHeight)/2,color='black',fill=False)
+# 	ax5.add_patch(edge)
+# 	ax5.plot(fullPoslist[0],fullPoslist[1])
+
+# 	ax5.plot(pos1[0],pos1[1])
+# 	ax5.plot(head_pos[0,:],head_pos[1,:],color='red')
+
+# 	ax5.arrow(pos1[0][-1],pos1[1][-1],2*(pos1[0][-1]-pos1[0][-2]),2*(pos1[1][-1]-pos1[1][-2]),head_width=2.0)
+# 	ax5.set_aspect('equal')
+# 	aLim = ax5.get_ylim()
+# 	ax5.set_ylim([aLim[1],aLim[0]])
+# 	#ax5.set_xlim((np.min(np.concatenate(([-10],x1s))),np.max(np.concatenate(([10],x1s)))))
+# 	# ax5.set_ylim((np.min(np.concatenate(([-10],y1s))),np.max(np.concatenate(([10],y1s)))))
+# 	ax5.set_title("trajectory")
+# 	ax6 = fig2.add_subplot(1,4,4)
+# 	ax6.imshow(maxProjList[cL])
+# 	plt.show()
 
 
 X_emb =[]
@@ -280,28 +298,31 @@ for k1 in range(0,len(onW)):
 
 group = []
 groups = []
+groupFnames = []
 # print list_inC
 for k1 in range(0,len(list_inC)):
 	cVal = list_inC[k1]
 
 	if len(group)>0:
-		if (cVal-list_inC[k1-1]) ==1:
+		if (cVal-list_inC[k1-1]) ==1 and listFNames[list_inC[k1-1]] ==listFNames[list_inC[k1]]:
 		# group.append(listEmb[k1-1])
 			group.append(cVal)
 		else:
 			groups.append(group)
+			groupFnames.append(listFNames[list_inC[k1-1]])
 			group=[cVal]
 	else:
 		group.append(cVal)
 
 if len(group)>0:
 	groups.append(group)
-print groups
+	groupFnames.append(listFNames[list_inC[k1]])
+# print groups
 
-for i in xrange(0,len(groups)):
-	if listFNames[groups[i][len(groups[i])-1]]== listFNames[groups[i][len(groups[i])-1]+1]:
-		groups[i].append(groups[i][len(groups[i])-1]+1)
-# fig,ax = plt.subplots()
+# for i in xrange(0,len(groups)):
+# 	if listFNames[groups[i][len(groups[i])-1]]== listFNames[groups[i][len(groups[i])-1]+1] and wallCheck[groups[i][len(groups[i])-1]+1]==0:
+# 		groups[i].append(groups[i][len(groups[i])-1]+1)
+# # fig,ax = plt.subplots()
 colors_list = ["#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059","#FF5733","#FFD133",
 	"#FFDBE5", "#7A4900", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
 	"#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80",
@@ -323,23 +344,18 @@ outThetas = []
 decTime = []
 eventNum = []
 eventType = []
-<<<<<<< Updated upstream
-=======
 eventFrames,eventFNames = [],[]
 i= 1
 hBL = bodyLength /2. 
 print (len(groups))
 for g1 in groups:
 	# print listFNames[g1]
->>>>>>> Stashed changes
 
-for g1 in groups:
-	print g1
+	lastEnd = list1[g1[0]][1]
+	# if list1[g1[0]][0]<300:
+	# 	i+=1
+	# 	continue
 	fig,ax = plt.subplots()
-<<<<<<< Updated upstream
-	for i1 in xrange(0,len(g1)):
-		l = g1[i1]
-=======
 
 	for i1 in range(0,len(g1)):
 		l = g1[i1]
@@ -348,18 +364,20 @@ for g1 in groups:
 		if list1[g1[i1]][0] -lastEnd >5 and i1!=0:
 			lastEnd = list1[g1[i1]][1]
 
-			print ("check1")#break
+			print ("check1")
 		else:
 			lastEnd = list1[g1[i1]][1]
->>>>>>> Stashed changes
 		head_pos = np.array(posList[l])
 		hTheta = np.array(ang_val_list[l])
 
-		head_pos[0,:] = head_pos[0,:] - 7.0*np.sin(np.pi/180*hTheta)
-		head_pos[1,:] = head_pos[1,:] + 7.0*np.cos(np.pi/180*hTheta)
+		head_pos[0,:] = head_pos[0,:] - hBL*np.sin(np.pi/180*hTheta)
+		head_pos[1,:] = head_pos[1,:] + hBL*np.cos(np.pi/180*hTheta)
 		if onW_inC[l]==1:
-			ax.plot(head_pos[0,:],head_pos[1,:],color=colors_list[i1])
-			ax.plot(posList[l][0],posList[l][1],color='b')
+			try:
+				ax.plot(head_pos[0,:],head_pos[1,:],color=colors_list[i1])
+				ax.plot(posList[l][0],posList[l][1],color='b')
+			except:
+				break
 		else:
 			ax.plot(head_pos[0,:],head_pos[1,:],color='k')
 			ax.plot(posList[l][0],posList[l][1],color='g')
@@ -373,70 +391,61 @@ for g1 in groups:
 		aF.close()
 		t1 = data[3]
 		t2 = data[4]
+		ax.plot((t1[0][0],t1[0][1]),(t1[1][0],t1[1][1]),color ='g')
+		ax.plot((t2[0][0],t2[0][1]),(t2[1][0],t2[1][1]),color ='g')
+		# print head_pos[:,0]
 
-		angVert = np.arctan2((t1[1][1]-t1[1][0]),(t1[0][1]-t1[0][0]))
-		angHoriz = np.arctan2((t2[0][1]-t2[0][0]),(t2[1][1]-t2[1][0]))
+		m1 = (t1[0][1]-t1[0][0])/(t1[1][1]-t1[1][0]) # 1/slope
+
+		m2 = (t2[1][1]-t2[1][0])/(t2[0][1]-t2[0][0])
+
+
+		b1 = -m1*t1[1][1] +t1[0][1]
+		b2 = -m2*t2[0][1] + t2[1][1]
+
+		intersectCenter = np.array([(m1*b2+b1)/(1.-m1*m2),m2*((m1*b2+b1)/(1.-m1*m2))+b2])
+		# q4 = intersectCenter
+		# q4 = [q4[1],q4[0]]
+		vertVector = np.array([(t1[0][1]-t1[0][0]),(t1[1][1]-t1[1][0])])
+		vertVector = vertVector/np.linalg.norm(vertVector)
+
+		if vertVector[1]<0:
+			vertVector = -vertVector
+
+		horizVector = np.array([(t2[0][1]-t2[0][0]),(t2[1][1]-t2[1][0])])
+		horizVector = horizVector/np.linalg.norm(horizVector)
+		if horizVector[0]<0:
+			horizVector = -horizVector
+
+		tH1 = 180./np.pi*np.arctan2(horizVector[1],horizVector[0])
+		tV1 =180./np.pi*np.arctan2(vertVector[1],vertVector[0])
+		tV1 = tV1 % 360.
+		tH1 = tH1 if abs(tH1) < (90.) else tH1 -180.
+		angVert = tV1
+		angHoriz = tH1
+		# angVert =np.arctan2((t1[1][1]-t1[1][0]),(t1[0][1]-t1[0][0]))
+		# angHoriz = np.arctan2((t2[1][1]-t2[1][0]),(t2[0][1]-t2[0][0]))
+		# angVert = (180*angVert/np.pi) % 360.
+		# angHoriz = 180.*angHoriz/np.pi if abs(angHoriz) < (np.pi/2) else 180.*angHoriz/np.pi -180.
 		if i1==0:
-			edge = Circle(q4,radius=(halfWidth+halfHeight)/2,color='black',fill=False)
+			edge = Circle(q4,radius=(halfWidth+halfHeight)/2+3,color='black',fill=False)
 			ax.add_patch(edge)
 			if quadList[l] ==1:
-				topRightQuad = Wedge(q4,(halfWidth+halfHeight)/2,angHoriz,90+angVert,alpha =0.3,color = 'orange')
-				bottomLeftQuad = Wedge(q4,(halfWidth+halfHeight)/2,180+angHoriz,270+angVert,alpha =0.3,color = 'orange')
+				topRightQuad = Wedge(intersectCenter,(halfWidth+halfHeight)/2+3,angHoriz,angVert,alpha =0.3,color = 'orange')
+				bottomLeftQuad = Wedge(intersectCenter,(halfWidth+halfHeight)/2+3,180+angHoriz,180+angVert,alpha =0.3,color = 'orange')
 				ax.add_patch(topRightQuad)
 				ax.add_patch(bottomLeftQuad)
 			elif quadList[l] ==2:
-				topLeftQuad = Wedge(q4,(halfWidth+halfHeight)/2,90+angVert,180+angHoriz,alpha =0.3,color = 'orange')
-				bottomRightQuad = Wedge(q4,(halfWidth+halfHeight)/2,270+angVert,360+angHoriz,alpha =0.3,color = 'orange')
+				topLeftQuad = Wedge(intersectCenter,(halfWidth+halfHeight)/2+3,angVert,180+angHoriz,alpha =0.3,color = 'orange')
+				bottomRightQuad = Wedge(intersectCenter,(halfWidth+halfHeight)/2+3,180+angVert,360+angHoriz,alpha =0.3,color = 'orange')
 				ax.add_patch(topLeftQuad)
 				ax.add_patch(bottomRightQuad)
 
 	ax.set_xlim([q4[0]-halfWidth-5,q4[0]+halfWidth+5])
 	ax.set_ylim([q4[1]-halfHeight-5,q4[1]+halfHeight+5])
 	ax.set_aspect('equal')
+	plt.gca().invert_yaxis()
 	plt.show()
-<<<<<<< Updated upstream
-	move_nums = input("which move?:  ")
-	print move_nums
-	time_bef = 0
-	if isinstance(move_nums,int):
-		move_nums = [move_nums] 
-	else:
-		move_nums = list(move_nums) 
-	for move_num in move_nums:
-		# print time_bef
-
-		if move_num >0 and move_num<100:
-			for i1 in xrange(0,move_num-1):
-				time_bef+=listFramesInTempB[g1[i1]]
-			inThetas.append(angList[g1[move_num-1]])
-			outThetas.append(color[g1[move_num-1]])
-			decTime.append(time_bef)
-			eventNum.append(g1[move_num-1])
-			eventType.append('turn')
-
-		elif move_num<0:
-			move_num = -move_num
-			for i1 in xrange(0,move_num-1):
-				time_bef+=listFramesInTempB[g1[i1]]
-			inThetas.append(angList[g1[move_num-1]])
-			outThetas.append(color[g1[move_num-1]])
-			decTime.append(time_bef)
-			eventNum.append(g1[move_num-1])
-			eventType.append('crossing')
-
-		elif move_num>100:
-			move_num = move_num -100
-			for i1 in xrange(0,move_num-1):
-				time_bef+=listFramesInTempB[g1[i1]]
-			inThetas.append(angList[g1[move_num-1]])
-			outThetas.append(color[g1[move_num-1]])
-			decTime.append(time_bef)
-			eventNum.append(g1[move_num-1])
-			eventType.append('stop')
-
-
-responseData = (inThetas,outThetas,decTime,eventNum,l,listFNames) 
-=======
 
 	while True:
 		try:
@@ -447,15 +456,10 @@ responseData = (inThetas,outThetas,decTime,eventNum,l,listFNames)
 				move_nums = [int(move_nums)]
 			time_bef = 0
 			print(move_nums)
-			'''
-			if isinstance(move_nums,int):
-				move_nums = [move_nums] 
-			else:
-				move_nums = list(move_nums) 
-			'''
 			for move_num in move_nums:
 				# print time_bef
-				if move_num != 0:# and move_num<100:
+
+				if move_num >0:# and move_num<100:
 					# for i1 in xrange(0,move_num-1):
 					# 	time_bef+=listFramesInTempB[g1[i1]]
 					inThetas.append(angList[g1[move_num-1]])
@@ -463,6 +467,16 @@ responseData = (inThetas,outThetas,decTime,eventNum,l,listFNames)
 					decTime.append(time_bef)
 					eventNum.append(g1[move_num-1])
 					eventFrames.append(list1[g1[move_num-1]])
+					eventFNames.append(groupFnames[i-1])
+					eventType.append('turn')
+				if move_num <0:# and move_num<100:
+					# for i1 in xrange(0,move_num-1):
+					# 	time_bef+=listFramesInTempB[g1[i1]]
+					inThetas.append(angList[g1[move_num]])
+					outThetas.append(color[g1[move_num]])
+					decTime.append(time_bef)
+					eventNum.append(g1[move_num])
+					eventFrames.append(list1[g1[move_num]])
 					eventFNames.append(groupFnames[i-1])
 					eventType.append('turn')
 
@@ -485,202 +499,15 @@ responseData = (inThetas,outThetas,decTime,eventNum,l,listFNames)
 				# 	decTime.append(time_bef)
 				# 	eventNum.append(g1[move_num-1])
 				# 	eventType.append('stop')
-		except Exception as e:
-			print("Not a possible value. Try again.")
+		except:
+			print ("Not a possible value. Try again.")
 			continue
 		break
 	print (len(groups)-i, " left!")
 	i+=1
 
+
 responseData = (inThetas,outThetas,decTime,eventNum,eventType, l,listFNames,eventFrames,eventFNames) 
->>>>>>> Stashed changes
 outFile = inputDir.split("/")[-2] + ".response"
 pickle.dump(responseData,open(outFile,"wb"))
-# print len(angList),len(onW)
-# # inThetas = [angList[listEmb[k1]] for k1 in xrange(0,len(listEmb))]
-# # outThetas = [color[listEmb[k1]] for k1 in xrange(0,len(listEmb))]
-# listSF = np.array(listSF)
-# if colorOption>1:
-# 	group = []
-# 	groups = []
-# 	for k1 in xrange(0,len(listEmb)-1):
 
-# 		if (listEmb[k1+1]-listEmb[k1])==1 and listFNames[k1+1]==listFNames[k1]:
-# 			# group.append(listEmb[k1-1])
-# 			group.append(listEmb[k1])
-# 		elif len(group)>0:
-# 			# if len(group)>1:
-# 			# 	group = group[1:len(group)]
-# 			group.append(listEmb[k1])
-# 			groups.append(group)
-# 			group=[]
-
-# 	newInThetas=[]
-# 	newOutThetas=[]
-# 	newListemb = []
-# 	pt_color = []
-# 	color = np.array(color)
-# 	for k1 in xrange(0,len(groups)):
-# 		frames_before = 0
-# 		inds = np.array(groups[k1])
-# 		lenSFs = listSF[inds]
-# 		# not_short_inds = lenSFs>5
-# 		# inds = inds[not_short_inds]
-# 		inds = inds[1:len(inds)]
-# 		inds2 = []
-# 		for i in xrange(0,len(inds)):
-# 			if (onW_inC[inds[i]]==onW[inds[i]]):
-# 				inds2.append(inds[i])
-# 		inds = inds2
-# 		# inds = [i if (onW_inC[i]==onW[i]) else [] for i in inds]
-# 		tally = np.sum([(1 if onW_inC[i] else 0) for i in inds])
-# 		if tally >1:
-# 			#newInThetas.append(angList[groups[k1][0]])
-# 			a11 = np.max(color[inds])
-# 			a11_i = np.argmax(color[inds])
-# 			a12= np.min(color[inds])
-# 			a12_i= np.argmin(color[inds])
-# 			if np.abs(a11)>np.abs(a12):
-# 				newOutThetas.append(a11)
-# 				newInThetas.append(angList[inds[a11_i]])
-
-# 				color_emb.append(color[inds[a11_i]])
-# 				newListemb.append(inds[a11_i])
-# 				if a11_i == 0:
-# 					frames_before = 0
-# 				else:
-# 					for i1 in xrange(0,a11_i):
-# 						frames_before+=listSF[inds[i1]]
-
-# 				pt_color.append(np.log(frames_before+1))
-# 			else:
-# 				newOutThetas.append(a12)
-# 				newInThetas.append(angList[inds[a12_i]])
-
-# 				color_emb.append(color[inds[a12_i]])
-# 				newListemb.append(inds[a12_i])
-
-# 				if a12_i == 0:
-# 					frames_before = 0
-# 				else:
-# 					for i1 in xrange(0,a12_i):
-# 						frames_before+=listSF[inds[i1]]
-# 				pt_color.append(np.log(frames_before+1))
-
-# if colorOption>1:
-
-# 	fig,ax=plt.subplots()
-# 	scat2 = ax.scatter(newInThetas,newOutThetas,c=pt_color,picker=5,s=15)
-# 	plt.colorbar(scat2,ax=ax)
-# 	ax.set_xlabel('initial angle relative to temp wall')
-# 	ax.set_ylabel('resulting turn angle')
-# 	ax.set_xlim([0,180])
-# 	fig.canvas.mpl_connect('pick_event', onpick_temp_boundary)
-# 	plt.show()
-# 	#plt.savefig('pointsHeatResponse.png')
-# 	from sklearn.neighbors.kde import KernelDensity
-# 	X1, Y1 = np.mgrid[0:180:200j, -180:180:200j]
-# 	positions = np.vstack([X1.ravel(), Y1.ravel()])
-# 	vals = np.concatenate(([newInThetas],[newOutThetas]),axis=0)
-# 	print positions.shape,vals.shape
-# 	kde2 = KernelDensity(bandwidth=12).fit(vals.T)
-# 	Z = np.exp(kde2.score_samples(positions.T))
-# 	print Z.shape
-# 	Z = np.reshape(Z,X1.shape)
-# 	Z = np.rot90(Z)
-# 	Z = Z/Z.sum(axis=0)
-# 	fig,ax = plt.subplots()
-# 	ax.imshow(Z,extent=[0,np.max(X1),-360,360],aspect='auto',cmap='afmhot')
-# 	ax.set_xlabel('initial angle relative to temp wall')
-# 	ax.set_ylabel('resulting turn angle')
-# 	plt.savefig('densityHeatResponse.png')
-
-# forAll = True
-# if forAll:
-# 	fig, ax = plt.subplots()
-# 	n,bins,patches = plt.hist(color,bins=70,facecolor='b',density=True,alpha=0.75)
-# 	plt.title("all turn histogram of type:"+str(colorOption))
-# 	plt.grid(True)
-# 	plt.savefig('allTurnsHist.png')
-
-# if colorOption>1 and forAll:
-# 	fig, ax = plt.subplots()
-# 	n2,bins2,patches2 = plt.hist(color_emb,bins=bins,density=True,facecolor='b',alpha=0.75)
-# 	plt.title("near wall histogram of type:"+str(colorOption))
-# 	plt.grid(True)
-# 	plt.savefig('wallTurnsHist.png')
-
-# 	from sklearn.neighbors.kde import KernelDensity
-# 	from sklearn.model_selection import GridSearchCV
-
-# 	xmin1 = np.min(color)
-# 	xmax1 = np.max(color)
-# 	dmain= np.linspace(xmin1,xmax1,100)
-# 	# grid = GridSearchCV(KernelDensity(),{'bandwidth':np.linspace(-1,20.0,25)},cv=5)
-# 	# grid.fit(np.array(color)[:,None])
-# 	# bw1 = grid.best_params_.get('bandwidth')
-# 	# print bw1, "bw1"
-# 	tran1 = KernelDensity(bandwidth=3).fit(np.array(color)[:,None])
-# 	lDens1 = tran1.score_samples(dmain[:,None])
-
-# 	# grid = GridSearchCV(KernelDensity(),{'bandwidth':np.linspace(-1.,20.0,25)},cv=5)
-# 	# grid.fit(np.array(color)[:,None])
-# 	# bw1 = grid.best_params_.get('bandwidth')
-# 	# print bw1, "bw2"
-# 	tran2 = KernelDensity(bandwidth=3).fit(np.array(color_emb)[:,None])
-# 	lDens2 = tran2.score_samples(dmain[:,None])
-
-# 	# print len(lDens1),len(lDens2)
-# 	relHist = np.exp(lDens2)/np.exp(lDens1)
-# 	bins_mean = [0.5 * (bins[i] + bins[i+1]) for i in range(len(bins)-1)]
-# 	plt.plot(dmain,relHist)
-# 	plt.grid(True)
-# 	plt.savefig('relTurnsHist.png')
-# 	plt.clf()
-# 	plt.plot(dmain,np.exp(lDens1))
-# 	plt.plot(dmain,np.exp(lDens2))
-# 	plt.grid(True)
-# 	plt.savefig('smoothedVals.png')
-# # Y = LocallyLinearEmbedding(n_components=2,method="modified").fit_transform(behavior)
-# # if colorOption ==0:
-# # 	plt.scatter(Y[:, 0], Y[:, 1],color=color)
-# # elif colorOption ==1:
-# # 	plt.scatter(Y[:, 0], Y[:, 1],c=color)
-# # 	plt.colorbar()
-# # plt.show()
-
-
-# # ####to represent intrinsic dimensionality of dataset
-# # reconstruct_E = []
-# # for i in xrange(2,7):
-# # 	print "isomap with d=",i
-# # 	imap = Isomap(n_components=i)
-# # 	Y = imap.fit_transform(behaviorCat)
-# # 	reconstruct_E.append(imap.reconstruction_error())
-
-
-# # plt.plot(reconstruct_E)
-# # plt.show()
-# ########################################3
-
-
-
-# # if colorOption ==0:
-# # 	plt.scatter(Y[:, 0], Y[:, 1],color=color,alpha=0.4,s=2)
-# # elif colorOption ==1:
-# # 	plt.scatter(Y[:, 0], Y[:, 1],c=color,alpha=0.4,s=2)
-# # 	plt.colorbar()
-# # plt.show()
-
-
-
-# # pca = PCA(n_components =2)
-# # pca.fit(behavior)
-# # Y = pca.fit_transform(behavior)
-
-# # if colorOption ==0:
-# # 	plt.scatter(Y[:, 0], Y[:, 1],color=color)
-# # elif colorOption ==1:
-# # 	plt.scatter(Y[:, 0], Y[:, 1],c=color)
-# # 	plt.colorbar()
-# # plt.show()
