@@ -67,6 +67,8 @@ for filename in os.listdir(inputDir):
 			inCold = np.sum([quads1 in coldQuads for quads1 in quads])
 			arenaFile = allEvents[l].arenaFile
 			showQuadrants = allEvents[l].showQuadrants
+			# @Miguel Comment out the line below for older arena configuration, comment in for newer ones
+			showQuadrants = 3 - showQuadrants
 			if showQuadrants ==1:
 				startInCold = quads[0] in hotQuads
 				startInCold_head = quads_head[0] in hotQuads
