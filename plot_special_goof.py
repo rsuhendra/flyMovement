@@ -57,7 +57,7 @@ def calc_distance(cVector,quad_hot):
 (yvals30,levels30,yvals35,levels35,yvals40,levels40,x2,y2,ti,ti35,ti0) = pickle.load(open("contour_info30_40.pkl","rb"),encoding='latin1')
 tempTest = 1
 inputF = str(sys.argv[1])
-groupName = 'DNB05+'
+groupName = 'test'
 inputDir = 'outputs/outputs_'+groupName+'/output_40/'
 plotdir = 'polar/polar_plots/polar_plot_'+groupName+'/'
 datadir = 'polar/polar_data/polar_data_'+groupName+'/'
@@ -80,7 +80,7 @@ if tempTest:
 	listEventNum,angList,ang_val_list = [],[],[]
 	for filename in os.listdir(inputDir):
 		if filename.split(".")[-1] == 'output':
-			(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(inputDir+filename,"rb"))
+			(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist,flipQuadrants) = pickle.load(open(inputDir+filename,"rb"))
 			#extract max event size. 
 			for l in range(0,len(allEvents)):
 				s1,f1 = allEvents[l].getStartAndFinish()
@@ -108,8 +108,11 @@ for i in range(0,len(e_fnames)):
 	elif  (filename1.split('/')[-1]).split('_')[1] == '25vs35':
 		ti1 = ti35
 
-	(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(inputDir+filename1,"rb"))
+	(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist,flipQuadrants) = pickle.load(open(inputDir+filename1,"rb"))
 	showQuadrants = int(filename1.split(".")[0].split("_")[-1])
+	# flipping
+	if flipQuadrants == 1:
+		showQuadrants = 3-showQuadrants
 	frames1 = e_frames[i]
 	arenaFile = allEvents[0].arenaFile
 	aF = open(arenaFile,"rb")
@@ -297,7 +300,6 @@ for i in range(0,len(rCount)):
 	rCountNorm[i] =rCount[i]/tot
 	# sCountNorm[i]= sCount[i]/tot
 	lCountNorm[i] = lCount[i]/tot
-
 
 import csv
 with open(datadir+'special_count_values_'+inputF.split('.')[0]+'.csv', 'w') as csvfile:

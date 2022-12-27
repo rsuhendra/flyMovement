@@ -1822,8 +1822,10 @@ if __name__ == "__main__":
     suppress = int(sys.argv[7]) # suppress big output
     filename = str(sys.argv[1])
     showQuadrants = int(filename.split("/")[-1].split(".")[0].split("_")[-1])
+    flipQuadrants = int(sys.argv[8])
     # flipping
-    showQuadrants = 3-showQuadrants
+    if flipQuadrants == 1:
+        showQuadrants = 3-showQuadrants
     toPlot = int(sys.argv[2])
     arenaFile = str(sys.argv[3])
     outputFolder = str(sys.argv[4])
@@ -2011,7 +2013,7 @@ if __name__ == "__main__":
 
     if saveData == True:
         trajData = (allEvents, tV, sV, fAngs_deriv, fc_x, fc_y, fAngs,
-                    hvCloser, threshVal1, scaling, bodyLength, antennaeDist)
+                    hvCloser, threshVal1, scaling, bodyLength, antennaeDist, flipQuadrants)
         outFile = outputFolder + '/' + \
             filename.split(".")[0].split("/")[-1] + ".output"
         pickle.dump(trajData, open(outFile, "wb"))

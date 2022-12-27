@@ -95,7 +95,7 @@ for inputDir in dirs:
         if filename.split(".")[-1] == 'output':
             ct = 0
             (allEvents, tV, sV, fAngs_deriv, fc_x, fc_y, fAngs, hvCloser, threshVal1,
-             scaling, bodyLength, antennaeDist) = pickle.load(open(inputDir+filename, "rb"))
+             scaling, bodyLength, antennaeDist, flipQuadrants) = pickle.load(open(inputDir+filename, "rb"))
             # get filename, parameters associated
             arenaFile = allEvents[0].arenaFile
             aF = open(arenaFile, "rb")
@@ -124,7 +124,7 @@ for inputDir in dirs:
 
             vertVector = np.array([(t1[0][1]-t1[0][0]), (t1[1][1]-t1[1][0])])
             vertVector = vertVector/np.linalg.norm(vertVector)
-
+            
             if vertVector[1] < 0:
                 vertVector = -vertVector
 
@@ -142,8 +142,8 @@ for inputDir in dirs:
             angHoriz *= -1.
 
             showQuadrants = int(filename.split(".")[0].split("_")[-1])
-            # flipping
-            showQuadrants = 3 - showQuadrants
+            if flipQuadrants == 1:
+                showQuadrants = 3 - showQuadrants
 
             # calculate basic stats for each video. then add together to get group stats.
 

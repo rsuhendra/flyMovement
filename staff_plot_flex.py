@@ -336,7 +336,7 @@ for filename in os.listdir(inputDir):
 		print (filename)
 		ct=0
 		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,
-			scaling,bodyLength,antennaeDist) = pickle.load(open(inputDir+filename,"rb"))
+			scaling,bodyLength,antennaeDist, flipQuadrants) = pickle.load(open(inputDir+filename,"rb"))
 		#get filename, parameters associated
 		arenaFile = allEvents[0].arenaFile
 		aF = open(arenaFile,"rb")
@@ -393,8 +393,8 @@ for filename in os.listdir(inputDir):
 		# ax11.plot(t2[0],t2[1],color='green')
 		# ax11.scatter(intersectCenter[0],intersectCenter[1],color='red')
 		showQuadrants = int(filename.split(".")[0].split("_")[-1])
-		# flipping
-		showQuadrants = 3 - showQuadrants
+		if flipQuadrants == 1:
+			showQuadrants = 3 - showQuadrants
 		last = False
 		cSeq = []
 		cSeq_LA,cSeq_RA = [],[]

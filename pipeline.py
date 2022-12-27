@@ -1,7 +1,7 @@
 import os
 
 # runs original group stuff
-groups=['P6+', 'P6Kir']
+groups=['MBON+', 'MBON_Kir']
 if 1:
     for groupName in groups:
         os.system("python run_group.py videos/"+groupName)
@@ -11,8 +11,8 @@ if 1:
 
 
 # runs staff plot flex and bdry analysis flex
-#groups=['61933FL50', '61933Kir', 'KirFL50', 'FL50']
-#groups=['FL50', '61933Kir', ]
+#groups=['61933FL50', '61933Kir', 'KirFL50', 'merged_FL50']
+#groups=['FL50']
 if 1: 
     temps = ['30', '35', '40']
     for groupName in groups:

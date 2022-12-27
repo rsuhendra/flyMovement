@@ -49,7 +49,25 @@ for temp in temps:
 
             summer2022 = ['P6Kir', 'P6+', 'P4_P6_+', 'P4_P6_Kir']
 
-            if name in dec2021:
+            mbon2017 = ['MBON+', 'MBON_Kir']
+
+            if name in mbon2017:
+                tval = 180
+                if quad == 'croppedQ1':
+                    arenafile = 'mbon17q1.arena'
+                elif quad == 'croppedQ2':
+                    arenafile = 'mbon17q2.arena'
+                elif quad == 'croppedQ3':
+                    arenafile = 'mbon17q3.arena'
+                elif quad == 'croppedQ4':
+                    arenafile = 'mbon17q4.arena'
+                else:
+                    print('Error!!!!')
+                scaling = 4.7
+                suppress = 1
+                flip = 0
+
+            elif name in dec2021:
                 if quad == 'croppedQ1':
                     arenafile = 'q1_prova1_1.arena'
                 elif quad == 'croppedQ2':
@@ -57,6 +75,7 @@ for temp in temps:
                 scaling = 4.7
                 tval = 150
                 suppress = 1
+                flip = 1
 
             elif name in jenna2017:
                 if quad == 'croppedQ1' or quad == 'Q1':
@@ -69,6 +88,7 @@ for temp in temps:
                     arenafile = 'q4_jenna3N.arena'
                 scaling = 4.7
                 tval = 180 
+                flip = 0
             
             elif name == 'newFL50':
                 if quad == 'croppedQ3' or quad == 'Q3':
@@ -77,6 +97,7 @@ for temp in temps:
                     arenafile = 'q4_10_2018.arena'
                 scaling = 4.7
                 tval = 70
+                flip = 0
             
             elif name == 'FL50':
                 if quad == 'croppedQ1':
@@ -89,26 +110,92 @@ for temp in temps:
                     arenafile = 'q4_2016.arena'
                 scaling = 4.7
                 tval = 150
-            
+                flip = 0
+
+            elif name == 'merged_FL50':
+                scaling = 4.7
+                flip = 0
+                if filename.split("_")[2].split("-")[2]=="2016":
+                    tval = 150
+                    if quad == 'croppedQ1':
+                        arenafile = 'q1_2016.arena'
+                    elif quad == 'croppedQ2':
+                        arenafile = 'q2_2016.arena'
+                    elif quad == 'croppedQ3':
+                        arenafile = 'q3_2016.arena'
+                    elif quad == 'croppedQ4':
+                        arenafile = 'q4_2016.arena'
+                elif filename.split("_")[2].split("-")[2]=="2018":
+                    tval = 70
+                    if quad == 'croppedQ3' or quad == 'Q3':
+                        arenafile = 'q3_10_2018.arena'
+                    elif quad == 'croppedQ4' or quad == 'Q4':
+                        arenafile = 'q4_10_2018.arena'
+                else:
+                    print('YOU MESSED UP')
+
+            elif name == 'merged_KirFL50':
+                scaling = 4.7
+                flip = 0
+                #print(filename.split("_")[2].split("-")[2])
+                if filename.split("_")[2].split("-")[2] in ["2016", "2017"]:
+                    if quad == 'croppedQ1' or quad == 'Q1':
+                        arenafile = 'q1_jenna3N.arena'
+                    elif quad == 'croppedQ2' or quad == 'Q2':
+                        arenafile = 'q2_jenna3N.arena'
+                    elif quad == 'croppedQ3' or quad == 'Q3':
+                        arenafile = 'q3_jenna3N.arena'
+                    elif quad == 'croppedQ4' or quad == 'Q4':
+                        arenafile = 'q4_jenna3N.arena'
+                    tval = 180 
+                elif filename.split("_")[2].split("-")[2]=="2019":
+                    if quad == 'croppedQ2':
+                        arenafile = 'q2_shtrpa1.arena'
+                    elif quad == 'croppedQ4':
+                        arenafile = 'q4_shtrpa1.arena'
+                    tval = 120
+                elif filename.split("_")[2].split("-")[2]=="2021":
+                    if float(filename.split("_")[2].split('-')[0]) > 2.:
+                        if float(filename.split("_")[2].split('-')[0]) > 3.:
+                            tval = 70
+                        else:
+                            tval = 120
+                        if quad == 'croppedQ1':
+                            arenafile = 'q1_96midJan.arena'
+                        elif quad == 'croppedQ2':
+                            arenafile = 'q2_96midJan.arena'
+                    else:
+                        tval = 150
+                        if ((float(filename.split("_")[2].split('-')[0])-1)*100 + float(filename.split("_")[2].split('-')[1])) > 22:
+                            if quad == 'croppedQ1':
+                                arenafile = 'q1_96lateJan.arena'
+                            elif quad == 'croppedQ2':
+                                arenafile = 'q2_96lateJan.arena'
+                        else:
+                            if quad == 'croppedQ1':
+                                arenafile = 'q1_96midJan.arena'
+                            elif quad == 'croppedQ2':
+                                arenafile = 'q2_96midJan.arena'
+                else:
+                    print('YOU MESSED UP BUDDY')
+
             elif name == 'KirFL50extra':
                 if quad == 'croppedQ2':
-                    if filename.split("_")[2].split("-")[0] == '08':
-                        arenafile = 'q2_aug2019.arena'
-                    elif filename.split("_")[2].split("-")[0] == '09':
-                        arenafile = 'q2_sept2019.arena'
+                    arenafile = 'q2_shtrpa1.arena'
                 elif quad == 'croppedQ4':
-                    if filename.split("_")[2].split("-")[0] == '08':
-                        arenafile = 'q4_aug2019.arena'
-                    elif filename.split("_")[2].split("-")[0] == '09':
-                        arenafile = 'q4_sept2019.arena'
+                    arenafile = 'q4_shtrpa1.arena'
                 scaling = 4.7
-                tval = 150
+                tval = 120
+                flip = 0
 
             elif name in early2021:
                 print((float(filename.split("_")[2].split('-')[0])-1)*100 + float(filename.split("_")[2].split('-')[1]), 'month-1 + day')
                 print(float(filename.split("_")[2].split('-')[0]), 'month')
                 if float(filename.split("_")[2].split('-')[0]) > 2.:
-                    tval = 70
+                    if float(filename.split("_")[2].split('-')[0]) > 3.:
+                        tval = 70
+                    else:
+                        tval = 120
                     if quad == 'croppedQ1':
                         arenafile = 'q1_96midJan.arena'
                     elif quad == 'croppedQ2':
@@ -126,16 +213,21 @@ for temp in temps:
                         elif quad == 'croppedQ2':
                             arenafile = 'q2_96midJan.arena'
                 scaling = 4.7
+                flip = 0
 
             elif name in summer2022:
                 arenafile = 'q1_05_2022.arena'
                 scaling = 4.7
                 tval = 200
+                flip = 1
+            
+            else:
+                print('YOU MESSED UP BUDDY')
 
             arenafile = 'arenas/'+arenafile
             suppress = 1
-            print("python trackImproved_1.py " + folderWithDataFiles+'/'+filename +' 0 ' + arenafile + ' ' + outputDir + ' '+str(tval) + ' '+str(scaling)+ ' '+str(suppress))
-            os.system("python trackImproved_1.py " + folderWithDataFiles+'/'+filename +' 0 ' + arenafile + ' ' + outputDir + ' '+str(tval) + ' '+str(scaling)+ ' '+str(suppress))
+            print("python trackImproved_1.py " + folderWithDataFiles+'/'+filename +' 0 ' + arenafile + ' ' + outputDir + ' '+str(tval) + ' '+str(scaling)+ ' '+str(suppress) + ' '+str(flip))
+            os.system("python trackImproved_1.py " + folderWithDataFiles+'/'+filename +' 0 ' + arenafile + ' ' + outputDir + ' '+str(tval) + ' '+str(scaling)+ ' '+str(suppress) + ' '+str(flip))
 
 
             """ 

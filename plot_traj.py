@@ -20,11 +20,12 @@ outFolder = str(sys.argv[2])
 colorType = int(sys.argv[3])
 quadrant_color = int(sys.argv[4])
 showQuadrants = int(filename.split("/")[-1].split(".")[0].split("_")[-1])
-# flipping
-showQuadrants = 3-showQuadrants
 # print filename
 ct=0
-(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(filename,"rb"))
+(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist,flipQuadrants) = pickle.load(open(filename,"rb"))
+# flipping
+if flipQuadrants == 1:
+	showQuadrants = 3-showQuadrants
 #get filename, parameters associated
 arenaFile = allEvents[0].arenaFile
 aF = open(arenaFile,"rb")

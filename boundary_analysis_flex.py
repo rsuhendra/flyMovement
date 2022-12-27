@@ -307,7 +307,7 @@ for filename in os.listdir(inputDir):
 	print(filename)
 	if filename.split(".")[-1] == 'output':
 		ct=0
-		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(inputDir+filename,"rb"))
+		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist, flipQuadrants) = pickle.load(open(inputDir+filename,"rb"))
 		#get filename, parameters associated
 		arenaFile = allEvents[0].arenaFile
 		aF = open(arenaFile,"rb")
@@ -367,8 +367,8 @@ for filename in os.listdir(inputDir):
 		# ax11.plot(t2[0],t2[1],color='green')
 		# ax11.scatter(intersectCenter[0],intersectCenter[1],color='red')
 		showQuadrants = int(filename.split(".")[0].split("_")[-1])
-		# flipping
-		showQuadrants = 3 - showQuadrants
+		if flipQuadrants == 1:
+			showQuadrants = 3 - showQuadrants
 		last = False
 		cSeq,cSeq_centroid = [],[]
 		cSeq_LA,cSeq_RA = [],[]
@@ -1786,6 +1786,8 @@ tmax = griddata(x2,ti1[1,:],np.min(yvals)+5)
 #filter 1
 # filt1 = [0,3,6,14]
 if 1:
+	yvals1 = yvals
+	levels1 = levels
 	filt2 = [0,2,6,14]
 	if yvals == yvals30:
 		filt2 = filt2[0:3]
@@ -1865,25 +1867,27 @@ for i in range(0,len(ftInds)):
 # plt.close()
 
 
-#make fracs plot with first turns 
-fig,ax = plt.subplots(figsize=(5,10))
+#make fracs plot with max turns 
+fig,ax = plt.subplots(figsize=(5,6.75))
+'''
 for j1 in range(0,len(yvals)):
 	if j1%6 ==0:
 		ax.plot([0,0.5],[yvals[j1],yvals[j1]],color='red',linewidth=1.5,alpha=1.,zorder=10)
 	else:
 		ax.plot([0,0.5],[yvals[j1],yvals[j1]],color='orange',linewidth=1.5,alpha=1.,zorder=10)
-cts,bins,p0 = ax.hist(maxTsTurns+[5]*numCrosses,bins=list(np.array(yvals))+[np.min(yvals)+5,4.5,5.5],orientation='horizontal',color=col1,edgecolor='black',linewidth=1.5,zorder=20,weights=np.ones_like(maxTsTurns+[5]*numCrosses)/float(len(maxTsTurns+[5]*numCrosses)))
-ax.hist(firstTs,bins=list(np.array(yvals))+[np.min(yvals)+5,4.5,5.5],orientation='horizontal',color='green',edgecolor='black',linewidth=1.5,zorder=20,weights=np.ones_like(firstTs)/float(len(maxTsTurns+[5]*numCrosses)))
-
-ax.set_yticks(list(np.array(yvals))+[np.min(yvals)+5,5])
-ax.set_yticklabels(list(levels)+[np.around(tmax,decimals=3),'Crosses'])
-ax.set_xlim([0,0.65])
-ax.set_ylim([-3,6])
+'''
+cts,bins,p0 = ax.hist(maxTsTurns+[yvals[0]+5.2]*numCrosses,bins=list(np.array(yvals))+[np.min(yvals)+5,yvals[0]+5.4],orientation='horizontal',color=col1,edgecolor='black',linewidth=1.5,zorder=20,weights=np.ones_like(maxTsTurns+[5]*numCrosses)/float(len(maxTsTurns+[5]*numCrosses)))
+ax.set_yticks(list(np.array(yvals1))+[np.min(yvals)+5,yvals[0]+5.2])
+ax.set_yticklabels(list(levels1)+[np.around(tmax,decimals=3),'Crosses'])
+ax.set_xlim([0,0.6])
+ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+ax.set_xticklabels([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+ax.set_ylim([yvals[0]-0.1,yvals[0]+5.8])
 fig.tight_layout()
 plt.savefig('bdryflex/bdryflex_plots/bdryflex_plots_'+groupName+'/'+inputDir.split('/')[-2] +'_fracs_withfirst_maxT.svg')
-plt.close()
+plt.close() 
 
-# IDK WHAT IM MAKING ANYMORE
+# two bar plot
 fig,ax = plt.subplots(figsize=(10,5))
 cts,bins,p0 = ax.hist(maxTsTurns+[5]*numCrosses, bins=[yvals[0],yvals[2]]+[4,4.5,5.5],orientation='horizontal',color=col1,edgecolor='black',linewidth=1.5,zorder=20,weights=np.ones_like(maxTsTurns+[5]*numCrosses)/float(len(maxTsTurns+[5]*numCrosses)))
 ax.set_yticks([yvals[0],yvals[2]]+[4,5])
@@ -1892,6 +1896,34 @@ ax.set_xlim([0,1])
 fig.tight_layout()
 plt.savefig('bdryflex/bdryflex_plots/bdryflex_plots_'+groupName+'/'+inputDir.split('/')[-2] +'_marcoplot.svg')
 plt.close()
+
+# Plotting others
+maxTsTurnsTemp = griddata(x2,ti1[1,:],np.array(maxTsTurns))
+fig,ax = plt.subplots(figsize=(10,5))
+ax = sns.violinplot(y=maxTsTurnsTemp,bw='scott',orient='v',cut=0, color=col1)
+ax.set_yticks(list(levels)+[tmax])
+ax.yaxis.grid(True, which='major')
+fig.tight_layout()
+plt.savefig('bdryflex/bdryflex_plots/bdryflex_plots_'+groupName+'/'+inputDir.split('/')[-2] +'_marcoplot2.svg')
+plt.close()
+
+# plotting violin over turn bar
+fig,ax = plt.subplots(figsize=(5,10))
+sns.violinplot(y = maxTsTurns, bw='scott', orient='v', cut=0, color=col1, ax = ax)
+plt.setp(ax.collections, alpha=0.7)
+cts,bins,p0 = ax.hist(maxTsTurns+[5]*numCrosses,bins=list(np.array(yvals))+[np.min(yvals)+5,4.5,5.5],orientation='horizontal',color=col1,edgecolor='black',linewidth=1.5,zorder=0,weights=np.ones_like(maxTsTurns+[5]*numCrosses)/float(len(maxTsTurns+[5]*numCrosses)))
+ax.set_yticks(list(np.array(yvals))+[np.min(yvals)+5,5])
+ax.set_yticklabels(list(levels)+[np.around(tmax,decimals=3),'Crosses'])
+ax.set_xlim([0,0.6])
+ax.set_xticks(np.arange(7)*0.1)
+ax.set_xticklabels([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+ax.set_ylim([-3,6])
+fig.tight_layout()
+plt.savefig('bdryflex/bdryflex_plots/bdryflex_plots_'+groupName+'/'+inputDir.split('/')[-2] +'_viol_eturns.svg')
+plt.close() 
+print('cts=',cts)
+
+
 
 
 '''

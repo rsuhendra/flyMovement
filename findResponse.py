@@ -55,7 +55,7 @@ maxDiff = 300
 wallCheck = []
 for filename in os.listdir(inputDir):
 	if filename.split(".")[-1] == 'output':
-		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist) = pickle.load(open(inputDir+filename,"rb"))
+		(allEvents,tV,sV,fAngs_deriv,fc_x,fc_y,fAngs,hvCloser,threshVal1,scaling,bodyLength,antennaeDist,flipQuadrants) = pickle.load(open(inputDir+filename,"rb"))
 		#extract max event size. 
 		for l in range(0,len(allEvents)):
 			s1,f1 = allEvents[l].getStartAndFinish()
@@ -67,8 +67,7 @@ for filename in os.listdir(inputDir):
 			inCold = np.sum([quads1 in coldQuads for quads1 in quads])
 			arenaFile = allEvents[l].arenaFile
 			showQuadrants = allEvents[l].showQuadrants
-			# @Miguel Comment out the line below for older arena configuration, comment in for newer ones
-			showQuadrants = 3 - showQuadrants
+
 			if showQuadrants ==1:
 				startInCold = quads[0] in hotQuads
 				startInCold_head = quads_head[0] in hotQuads
@@ -509,7 +508,7 @@ for g1 in groups:
 	i+=1
 
 
-responseData = (inThetas,outThetas,decTime,eventNum,eventType, l,listFNames,eventFrames,eventFNames) 
-outFile = inputDir.split("/")[-2] + ".response"
+responseData = (inThetas,outThetas,decTime,eventNum,eventType,l,listFNames,eventFrames,eventFNames) 
+outFile = inputDir.split("/")[-3] + '_' + inputDir.split("/")[-2].split("_")[-1] + ".response"
 pickle.dump(responseData,open(outFile,"wb"))
 
