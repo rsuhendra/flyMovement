@@ -57,7 +57,7 @@ def calc_distance(cVector,quad_hot):
 (yvals30,levels30,yvals35,levels35,yvals40,levels40,x2,y2,ti,ti35,ti0) = pickle.load(open("contour_info30_40.pkl","rb"),encoding='latin1')
 tempTest = 1
 inputF = str(sys.argv[1])
-groupName = 'test'
+groupName = 'P6Kir'
 inputDir = 'outputs/outputs_'+groupName+'/output_40/'
 plotdir = 'polar/polar_plots/polar_plot_'+groupName+'/'
 datadir = 'polar/polar_data/polar_data_'+groupName+'/'
@@ -175,7 +175,7 @@ for i in range(0,len(e_fnames)):
 		#get first frame at which head is past the 25.5 line. 
 		# print'ha', allEvents[listEventNum[eventNum[i]]].frameEntryT
 		i0 = allEvents[listEventNum[eventNum[i]]].frameEntryT-1
-		print (i0, frames1,fAngs[i0],inThetas[i])
+		#print (i0, frames1,fAngs[i0],inThetas[i])
 		# cToHead = np.array([-np.sin(np.pi/180.*theta),np.cos(np.pi/180.*theta)])
 
 		cToRightAnt = [fc_y[i0]-hBL*np.sin(np.pi/180.*fAngs[i0]) -antennaeDist*np.cos(np.pi/180.*fAngs[i0]),fc_x[i0]+ hBL*np.cos(np.pi/180.*fAngs[i0])-antennaeDist*np.sin(np.pi/180.*fAngs[i0])]
@@ -190,11 +190,11 @@ for i in range(0,len(e_fnames)):
 
 		# # for checking theta. 
 		angle1 = (np.pi/2. - np.arcsin(np.abs(dForRightAnt-dForLeftAnt)/0.3))*180./np.pi
-		print (angle1,hotQ1,hc1,hv1)
+		#print (angle1,hotQ1,hc1,hv1)
 		if dForLeftAnt<dForRightAnt:
 			angle1= 180. - angle1
 
-		print (angle1,inThetas[i],'hi', dForRightAnt-dForLeftAnt,dForLeftAnt, dForRightAnt )
+		#print (angle1,inThetas[i],'hi', dForRightAnt-dForLeftAnt,dForLeftAnt, dForRightAnt )
 
 		# inThetas[i] = angle1
 
@@ -252,7 +252,7 @@ dmain= np.linspace(xmin1,xmax1,100)
 # print bw1, "bw1"
 import seaborn as sns
 fig, ax = plt.subplots()
-sns.kdeplot(np.array(color),bw=5,shade=True)
+sns.kdeplot(np.array(color),bw_method=5,fill=True)
 ax.set_xlim([-250,250])
 # tran1 = KernelDensity(bandwidth=3).fit(np.array(color)[:,None])
 # lDens1 = tran1.score_samples(dmain[:,None])
@@ -275,7 +275,7 @@ with open(datadir+inputF.split('.')[0]+'_turningVals.json','w') as f:
 bins = np.linspace(0,180,5)
 halfPts = (bins[1]-bins[0])/2 + bins[0:len(bins)-1]
 inds = np.digitize(inThetas,bins,right=True)
-print (inds,bins)
+#print (inds,bins)
 inds = inds-1
 numSlots = len(bins)-1
 rCount = np.zeros(numSlots)
@@ -301,6 +301,9 @@ for i in range(0,len(rCount)):
 	# sCountNorm[i]= sCount[i]/tot
 	lCountNorm[i] = lCount[i]/tot
 
+print('for Miguel: ', np.flip(rCount), np.flip(np.array(lCount)+ np.array(rCount)))
+print('lCountNorm: ', np.flip(rCountNorm))
+
 import csv
 with open(datadir+'special_count_values_'+inputF.split('.')[0]+'.csv', 'w') as csvfile:
 	writer = csv.writer(csvfile, delimiter=',',quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -313,7 +316,7 @@ with open(datadir+'special_count_values_'+inputF.split('.')[0]+'.csv', 'w') as c
 import seaborn as sns
 fig = plt.figure(figsize=(10,10))
 ax = plt.subplot(111,projection='polar')
-print (halfPts, rCount.shape)
+#print (halfPts, rCount.shape)
 # print np.concatenate((sCountNorm,rCountNorm))
 p1= plt.bar(halfPts*np.pi/180.,rCountNorm,width = (bins[1]-bins[0])*np.pi/180.,color='purple',edgecolor='k',linewidth=1.5)
 # p2 = plt.bar(halfPts*np.pi/180.,sCountNorm,width = (bins[1]-bins[0])*np.pi/180.,color='grey',bottom=rCountNorm,edgecolor='k',linewidth=1.5)
@@ -358,7 +361,7 @@ if tempTest:
 	plt.close()
 	bins = np.linspace(0,180,5)
 	aThresh = 15
-	print (outThetas[inds1]>aThresh)
+	#print (outThetas[inds1]>aThresh)
 	rights1 = np.sum(outThetas[inds1]>aThresh)
 	lefts1 = np.sum(outThetas[inds1]<-aThresh)
 	rights2 = np.sum(outThetas[inds2]>aThresh)
@@ -366,14 +369,14 @@ if tempTest:
 	rights3 = np.sum(outThetas[inds3]>aThresh)
 	lefts3 = np.sum(outThetas[inds3]<-aThresh)
 	tot1 = rights1+lefts1
-	print (tot1)
+	#print (tot1)
 	tot2 = rights2+lefts2
 	tot3 = rights3+lefts3
 	try:
 		lefts = np.array([1.0*lefts1/tot1,1.0*lefts3/tot3,1.0*lefts2/tot2])
 		rights = np.array([1.0*rights1/tot1,1.0*rights3/tot3,1.0*rights2/tot2])
 		import seaborn as sns
-		print (lefts,rights)
+		#print (lefts,rights)
 		fig,ax = plt.subplots()
 		p2 = ax.bar(np.array([0,1,2]),rights,color = 'purple')
 		p1 =ax.bar(np.array([0,1,2]),lefts,bottom=rights,color = 'green')
@@ -410,7 +413,7 @@ tOuts1 = lOuts+rOuts
 bins = np.linspace(0,.5,6)
 midPoints = [(bins[i]+bins[i-1])/2. for i in range(1,len(bins))]+ [(bins[-1]+bins[-2])/2.+(bins[-1]-bins[-2])]
 inds1 = np.digitize(tdiff1,bins)-1
-print (tdiff1)
+#print (tdiff1)
 
 fig,ax = plt.subplots()
 nBootstraps = 1000
