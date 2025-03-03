@@ -6,6 +6,8 @@ Simões, J.M., Levy, J.I., Zaharieva, E.E. et al. Robustness and plasticity in D
 
 I've modified it but most of the code was written by user joshuailevy. 
 
+## Instructions
+
 YML FILE IS CONTAINED. INSTALL LIKE SO:
 https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file
 
