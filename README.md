@@ -1,5 +1,11 @@
 # flyMovement (THIS README IS NOT UPDATED)
 
+This repository is forked from a private repository from user joshuailevy for the publication:
+
+Simões, J.M., Levy, J.I., Zaharieva, E.E. et al. Robustness and plasticity in Drosophila heat avoidance. Nat Commun 12, 2044 (2021). https://doi.org/10.1038/s41467-021-22322-w
+
+I've modified it but most of the code was written by user joshuailevy. 
+
 YML FILE IS CONTAINED. INSTALL LIKE SO:
 https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file
 
