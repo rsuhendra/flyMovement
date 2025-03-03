@@ -4,7 +4,7 @@ This repository is forked from a private repository from user joshuailevy for th
 
 Simões, J.M., Levy, J.I., Zaharieva, E.E. et al. Robustness and plasticity in Drosophila heat avoidance. Nat Commun 12, 2044 (2021). https://doi.org/10.1038/s41467-021-22322-w
 
-I've modified it but most of the code was written by user joshuailevy. 
+I've modified it for my own purposes but most of the code was written originally by https://github.com/joshuailevy. 
 
 ## Instructions
 
